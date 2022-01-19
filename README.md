@@ -1,8 +1,9 @@
 # CSCI 468: Compilers
 
 This is the base upstream repository for CSCI 468, compilers.  It holds the base code for the compiler that we will
-write for the class.  The project will be done individually, with a partner for the last part.  Note that this class is 
-a capstone class in the CSCI department and, as such, requires capstone documentation.  An outline of this can be found 
+write for the class.  The project will be done individually, with a partner for the last part.  
+
+Note that this class is a capstone class in the CSCI department and, as such, requires capstone documentation.  An outline of this can be found 
 in the `/capstone` directory.
 
 ## Getting Your Repo Set Up
