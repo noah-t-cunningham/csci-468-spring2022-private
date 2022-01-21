@@ -16,5 +16,6 @@ public class Scratch {
 
     public static void main(String[] args) {
         System.out.println("foo");
+        System.out.println("bar");
     }
 }
