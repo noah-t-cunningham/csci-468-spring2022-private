@@ -6,14 +6,6 @@ import java.util.LinkedList;
 
 public class Scratch {
 
-    public void main() {
-        var x = 10;
-        var y = 20;
-        var z = x + y;
-        var q = x + y;
-
-    }
-
     int add(int i) {
         return i + 13;
     }
@@ -22,4 +14,7 @@ public class Scratch {
         return i1 + i2;
     }
 
+    public static void main(String[] args) {
+        System.out.println("foo");
+    }
 }
