@@ -1,8 +1,9 @@
 # CSCI 468: Compilers
 
 This is the base upstream repository for CSCI 468, compilers.  It holds the base code for the compiler that we will
-write for the class.  The project will be done individually, with a partner for the last part.  Note that this class is 
-a capstone class in the CSCI department and, as such, requires capstone documentation.  An outline of this can be found 
+write for the class.  The project will be done individually, with a partner for the last part.  
+
+Note that this class is a capstone class in the CSCI department and, as such, requires capstone documentation.  An outline of this can be found 
 in the `/capstone` directory.
 
 ## Getting Your Repo Set Up
@@ -22,16 +23,16 @@ Once your repository is initialized, you can pull it down to your local machine.
 Next, you should add the class repository as an upstream git repo:
 
 ```bash
-$ git remote add upstream https://github.com/msu/csci-468-spring2021.git
-$ git pull upstream main
-$ git push
+$ git remote add upstream https://github.com/msu/csci-468-spring2022.git
+$ git pull upstream master
+$ git push origin master
 ```
 This will synchronize your private repository with the class repository.
 
 When you want to get an update from the public class repository you can run this command:
 
 ```
-$ git pull upstream main
+$ git pull upstream master
 ```
 
 ## CatScript
