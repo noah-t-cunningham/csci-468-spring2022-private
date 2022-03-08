@@ -201,13 +201,13 @@ public class CatScriptParser {
         // handles booleans
         else if (tokens.match(TRUE, FALSE)) {
             Token integerToken = tokens.consumeToken();
-            BooleanLiteralExpression booleanExpression = new BooleanLiteralExpression(Boolean.valueOf(integerToken.getStringValue()));
+            BooleanLiteralExpression booleanExpression = new BooleanLiteralExpression(Boolean.parseBoolean(integerToken.getStringValue()));
             booleanExpression.setToken(integerToken);
             return booleanExpression;
         }
         // handles null
         else if(tokens.match(NULL)) {
-            Token token = tokens.consumeToken();
+            tokens.consumeToken();
             return new NullLiteralExpression();
         }
 
