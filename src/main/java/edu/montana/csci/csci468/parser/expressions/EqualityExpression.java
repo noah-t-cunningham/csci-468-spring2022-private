@@ -7,6 +7,9 @@ import edu.montana.csci.csci468.parser.SymbolTable;
 import edu.montana.csci.csci468.tokenizer.Token;
 import edu.montana.csci.csci468.tokenizer.TokenType;
 
+import static edu.montana.csci.csci468.tokenizer.TokenType.EQUAL_EQUAL;
+import static edu.montana.csci.csci468.tokenizer.TokenType.GREATER;
+
 public class EqualityExpression extends Expression {
 
     private final Token operator;
@@ -53,7 +56,15 @@ public class EqualityExpression extends Expression {
 
     @Override
     public Object evaluate(CatscriptRuntime runtime) {
-        return super.evaluate(runtime);
+        // check what the operator is and do the appropriate comparison related to said operator
+        Object lhsValue = leftHandSide.evaluate(runtime);
+        Object rhsValue = rightHandSide.evaluate(runtime);
+        if (operator.getType().equals(TokenType.EQUAL_EQUAL)) {
+            return lhsValue == rhsValue;
+        } else {
+            return lhsValue != rhsValue;
+        }
+        //return super.evaluate(runtime);
     }
 
     @Override

@@ -8,6 +8,7 @@ import edu.montana.csci.csci468.parser.ParseError;
 import edu.montana.csci.csci468.parser.SymbolTable;
 import edu.montana.csci.csci468.parser.statements.FunctionDefinitionStatement;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -66,7 +67,17 @@ public class FunctionCallExpression extends Expression {
 
     @Override
     public Object evaluate(CatscriptRuntime runtime) {
-        return super.evaluate(runtime);
+        // i need to get better at commenting... anyway
+        // this gets the function, makes an empty array list, loops through the aruments,
+        // adds those evaluated arguments to the arrayList. Invoke then just so happend to take runtime and
+        // and arraylist as args, so we use the function and invoke those args.
+        FunctionDefinitionStatement function = getProgram().getFunction(name);
+        List<Object> argList = new ArrayList<>();
+        for (Expression argument : arguments) {
+            argList.add(argument.evaluate(runtime));
+        }
+        return function.invoke(runtime, argList);
+        //return super.evaluate(runtime);
     }
 
     @Override

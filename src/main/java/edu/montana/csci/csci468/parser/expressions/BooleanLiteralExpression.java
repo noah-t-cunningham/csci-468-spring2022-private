@@ -30,7 +30,9 @@ public class BooleanLiteralExpression extends Expression {
 
     @Override
     public Object evaluate(CatscriptRuntime runtime) {
-        return super.evaluate(runtime);
+        //i mean that pretty much sums it up
+        return booleanValue;
+        //return super.evaluate(runtime);
     }
 
     @Override

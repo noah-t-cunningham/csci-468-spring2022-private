@@ -61,10 +61,16 @@ public class UnaryExpression extends Expression {
 
     @Override
     public Object evaluate(CatscriptRuntime runtime) {
-        Object rhsValue = getRightHandSide().evaluate(runtime);
+        // check if we are a minus symbol or a not symbol and preform proper unary stuff
         if (this.isMinus()) {
-            return -1 * (Integer) rhsValue;
-        } else {
+            Integer rhsValue = (Integer) getRightHandSide().evaluate(runtime);
+            return -1 * rhsValue;
+        }
+        else if(this.isNot()){
+            Boolean rhsValue = (Boolean) getRightHandSide().evaluate(runtime);
+            return !rhsValue;
+        }
+        else {
             return null; // TODO handle boolean NOT
         }
     }

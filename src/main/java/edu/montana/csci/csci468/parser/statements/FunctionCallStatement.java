@@ -32,7 +32,10 @@ public class FunctionCallStatement extends Statement {
     //==============================================================
     @Override
     public void execute(CatscriptRuntime runtime) {
-        super.execute(runtime);
+        // this was it... I was pondering for hours on what to put here...
+        // evaluate the expression since FunctionCallExpression already does that
+        expression.evaluate(runtime);
+
     }
 
     @Override

@@ -21,7 +21,9 @@ public class NullLiteralExpression extends Expression {
 
     @Override
     public Object evaluate(CatscriptRuntime runtime) {
-        return super.evaluate(runtime);
+        // yup..
+        return null;
+        //return super.evaluate(runtime);
     }
 
     @Override

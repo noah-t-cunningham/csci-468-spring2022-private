@@ -1,6 +1,7 @@
 package edu.montana.csci.csci468.parser;
 
 import edu.montana.csci.csci468.CatscriptTestBase;
+import edu.montana.csci.csci468.parser.expressions.Expression;
 import edu.montana.csci.csci468.parser.expressions.IntegerLiteralExpression;
 import edu.montana.csci.csci468.parser.statements.CatScriptProgram;
 import edu.montana.csci.csci468.parser.statements.PrintStatement;

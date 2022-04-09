@@ -71,6 +71,9 @@ public class TokenList implements Iterable<Token> {
         return tokens.get(Math.max(0, currentToken - 1));
     }
 
+    //method i made to get next token, not sure if legal...
+    public Token nextToken() { return tokens.get(Math.max(0, currentToken + 1)); }
+
     public Stream<Token> stream() {
         return tokens.stream();
     }

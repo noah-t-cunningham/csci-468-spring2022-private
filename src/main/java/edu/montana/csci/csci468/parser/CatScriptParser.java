@@ -8,6 +8,7 @@ import edu.montana.csci.csci468.tokenizer.TokenList;
 import edu.montana.csci.csci468.tokenizer.TokenType;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import static edu.montana.csci.csci468.tokenizer.TokenType.*;
@@ -56,12 +57,161 @@ public class CatScriptParser {
     //  Statements
     //============================================================
 
+
     private Statement parseProgramStatement() {
-        Statement printStmt = parsePrintStatement();
-        if (printStmt != null) {
-            return printStmt;
+        Statement stmt = parseFunctionDefinitionStatement();
+        if (stmt != null) {
+            return stmt;
         }
-        return new SyntaxErrorStatement(tokens.consumeToken());
+        return parseStatement();
+    }
+
+    private FunctionDefinitionStatement parseFunctionDefinitionStatement(){
+        if(tokens.match(FUNCTION)){
+            FunctionDefinitionStatement funk = new FunctionDefinitionStatement();
+            funk.setStart(tokens.consumeToken());
+
+            Token functionName = require(IDENTIFIER, funk);
+            funk.setName(functionName.getStringValue());
+            require(LEFT_PAREN, funk);
+
+            //handles parameter lists
+            if(!tokens.match(RIGHT_PAREN) && tokens.hasMoreTokens()){
+                do {
+
+                    Token paramName = require(IDENTIFIER, funk);
+                    TypeLiteral typeLiteral = null;
+                    if (tokens.matchAndConsume(COLON)) {
+                        typeLiteral = parseTypeLiteral();
+                    }
+                    funk.addParameter(paramName.getStringValue(), typeLiteral);
+                } while(tokens.matchAndConsume(COMMA));
+            }
+            require(RIGHT_PAREN, funk);
+
+            //handles optional type expression
+            TypeLiteral typeLiteral = null;
+            if (tokens.matchAndConsume(COLON)) {
+                typeLiteral = parseTypeLiteral();
+            }
+            funk.setType(typeLiteral);
+
+            currentFunctionDefinition = funk;
+
+            require(LEFT_BRACE, funk);
+            LinkedList<Statement> stmts = new LinkedList<>();
+            funk.setBody(stmts);
+
+            while(!tokens.match(RIGHT_BRACE) && tokens.hasMoreTokens()){
+                stmts.add(parseStatement());
+                funk.setBody(stmts);
+            }
+            require(RIGHT_BRACE, funk);
+
+            return  funk;
+
+        }else{
+            return null;
+        }
+    }
+
+    private TypeLiteral parseTypeLiteral(){
+        if(tokens.match("int")){
+            TypeLiteral typeLiteral = new TypeLiteral();
+            typeLiteral.setType(CatscriptType.INT);
+            typeLiteral.setToken(tokens.consumeToken());
+            return typeLiteral;
+        }
+        if(tokens.match("string")){
+            TypeLiteral typeLiteral = new TypeLiteral();
+            typeLiteral.setType(CatscriptType.STRING);
+            typeLiteral.setToken(tokens.consumeToken());
+            return typeLiteral;
+        }
+        if(tokens.match("bool")){
+            TypeLiteral typeLiteral = new TypeLiteral();
+            typeLiteral.setType(CatscriptType.BOOLEAN);
+            typeLiteral.setToken(tokens.consumeToken());
+            return typeLiteral;
+        }
+        if(tokens.match("object")){
+            TypeLiteral typeLiteral = new TypeLiteral();
+            typeLiteral.setType(CatscriptType.OBJECT);
+            typeLiteral.setToken(tokens.consumeToken());
+            return typeLiteral;
+        }
+        if(tokens.match("list")){
+            TypeLiteral typeLiteral = new TypeLiteral();
+            typeLiteral.setType(CatscriptType.getListType(CatscriptType.OBJECT));
+            typeLiteral.setToken(tokens.consumeToken());
+            if(tokens.matchAndConsume(LESS)){
+                TypeLiteral componentType = parseTypeLiteral();
+                typeLiteral.setType(CatscriptType.getListType(componentType.getType()));
+                require(GREATER, typeLiteral);
+            }
+
+            return typeLiteral;
+        }
+        TypeLiteral typeLiteral = new TypeLiteral();
+        typeLiteral.setType(CatscriptType.getListType(CatscriptType.OBJECT));
+        typeLiteral.setToken(tokens.consumeToken());
+        typeLiteral.addError(ErrorType.BAD_TYPE_NAME);
+        return typeLiteral;
+    }
+
+
+
+    private Statement parseStatement(){
+//        try {
+
+            Statement printStmt = parsePrintStatement();
+            if (printStmt != null) {
+                return printStmt;
+            }
+            Statement forStmt = parseForStatement();
+            if (forStmt != null) {
+                return forStmt;
+            }
+            Statement ifStmt = parseIfStatement();
+            if (ifStmt != null) {
+                return ifStmt;
+            }
+            Statement varStmt = parseVariableStatement();
+            if (varStmt != null) {
+                return varStmt;
+            }
+            Statement assStmt = parseAssighnmentStatement();
+            if (assStmt != null) {
+                return assStmt;
+            }
+
+            Statement funkStmt = parseFunctionCallStatement();
+            if (funkStmt != null) {
+                return funkStmt;
+            }
+
+
+            Statement retStmt = parseReturnStatement();
+            if (retStmt != null) {
+                return retStmt;
+            }
+            // probably should delete this but i have a hard time letting go of code i thought might be useful
+
+//            SyntaxErrorStatement syntaxErrorStatement = new SyntaxErrorStatement(tokens.consumeToken());
+//            return syntaxErrorStatement;
+//        } catch (UnknownExpressionParseException e){
+//            SyntaxErrorStatement syntaxErrorStatement = new SyntaxErrorStatement(tokens.consumeToken());
+//            //e.printStackTrace();
+//            while(tokens.hasMoreTokens()){
+//
+//            }
+//            return syntaxErrorStatement;
+//        }
+//        Statement eof = parseEOF();
+//        if (eof != null){
+//            return eof;
+//        }
+        return null;
     }
 
     private Statement parsePrintStatement() {
@@ -75,6 +225,177 @@ public class CatScriptParser {
             printStatement.setEnd(require(RIGHT_PAREN, printStatement));
 
             return printStatement;
+        } else {
+            return null;
+        }
+    }
+
+    private Statement parseForStatement() {
+        if (tokens.match(FOR)) {
+
+            ForStatement forStatement = new ForStatement();
+            forStatement.setStart(tokens.consumeToken());
+
+            require(LEFT_PAREN, forStatement);
+            Token ident = require(IDENTIFIER, forStatement);
+            forStatement.setVariableName(ident.getStringValue());
+            //require(IDENTIFIER, forStatement);
+            require(IN, forStatement);
+            forStatement.setExpression(parseExpression());
+            require(RIGHT_PAREN, forStatement);
+            require(LEFT_BRACE, forStatement);
+            LinkedList<Statement> stmts = new LinkedList<>();
+            while (!tokens.match(RIGHT_BRACE) && !tokens.match(EOF)) {
+                stmts.add(parseStatement());
+            }
+            forStatement.setBody(stmts);
+            forStatement.setEnd(require(RIGHT_BRACE, forStatement));
+
+            return forStatement;
+        } else {
+            return null;
+        }
+    }
+
+    private Statement parseIfStatement() {
+        if (tokens.match(IF)) {
+
+            IfStatement ifStatement = new IfStatement();
+            ifStatement.setStart(tokens.consumeToken());
+
+            require(LEFT_PAREN, ifStatement);
+            ifStatement.setExpression(parseExpression());
+            require(RIGHT_PAREN, ifStatement);
+            require(LEFT_BRACE, ifStatement);
+            LinkedList<Statement> stmts = new LinkedList<>();
+            while (!tokens.match(RIGHT_BRACE) && !tokens.match(EOF)) {
+                stmts.add(parseStatement());
+            }
+            ifStatement.setTrueStatements(stmts);
+            // since i use .nextToken() have to make sure im not at EOF or it goes out of range
+            if(!tokens.match(EOF)) {
+                Token next = tokens.nextToken();
+                if (next.getType() == ELSE) {
+                    tokens.matchAndConsume(RIGHT_BRACE);
+                    tokens.matchAndConsume(ELSE);
+                    if (tokens.matchAndConsume(IF))
+                        parseIfStatement();
+                    else {
+                        require(LEFT_BRACE, ifStatement);
+                        if (!tokens.match(EOF)) {
+                            LinkedList<Statement> newStmts = new LinkedList<>();
+                            while (!tokens.match(RIGHT_BRACE) && !tokens.match(EOF)) {
+                                // make new stmts becasuean if else stament could have soemthoing like
+                                // if(something): x = 10
+                                // else: x = 5
+                                newStmts.add(parseStatement());
+                            }
+                            ifStatement.setElseStatements(newStmts);
+                        }
+                        ifStatement.setEnd(require(RIGHT_BRACE, ifStatement));
+                    }
+                }
+                else {
+                    ifStatement.setEnd(require(RIGHT_BRACE, ifStatement));
+                }
+            }
+            else {
+                ifStatement.setEnd(require(RIGHT_BRACE, ifStatement));
+            }
+
+            return ifStatement;
+        } else {
+            return null;
+        }
+    }
+
+    private Statement parseVariableStatement() {
+        if (tokens.match(VAR)) {
+
+            VariableStatement varStatement = new VariableStatement();
+            varStatement.setStart(tokens.consumeToken());
+
+            Token ident = require(IDENTIFIER, varStatement);
+            varStatement.setVariableName(ident.getStringValue());
+            TypeLiteral typeLiteral = null;
+            if (tokens.matchAndConsume(COLON)) {
+                typeLiteral = parseTypeLiteral();
+                varStatement.setExplicitType(typeLiteral.getType());
+                require(EQUAL, varStatement);
+                Expression exp = parseExpression();
+                varStatement.setExpression(exp);
+                varStatement.setEnd(exp.getEnd());
+            }
+            else {
+                require(EQUAL, varStatement);
+                Expression exp = parseExpression();
+                varStatement.setExpression(exp);
+                varStatement.setExplicitType(exp.getType());
+                varStatement.setEnd(exp.getEnd());
+            }
+
+            return varStatement;
+        } else {
+            return null;
+        }
+    }
+
+
+
+    private Statement parseAssighnmentStatement() {
+        if (tokens.match(IDENTIFIER)) {
+            // i created the .nextToken() method becasue i wanted to use the code i
+            // already wrote in parsePrimaryExpression
+            //ass is just short for Assignment okay, im not being immature...
+            Token next = tokens.nextToken();
+            if(next.getType() == LEFT_PAREN){
+                return null;
+            }
+            AssignmentStatement assStatement = new AssignmentStatement();
+            assStatement.setStart(tokens.getCurrentToken());
+
+            Token ident = require(IDENTIFIER, assStatement);
+
+            assStatement.setVariableName(ident.getStringValue());
+            require(EQUAL, assStatement);
+
+            Expression exp = parseExpression();
+            assStatement.setExpression(exp);
+            assStatement.setEnd(exp.getEnd());
+
+
+
+
+            return assStatement;
+        } else {
+            return null;
+        }
+    }
+
+    private Statement parseFunctionCallStatement() {
+        if (tokens.match(IDENTIFIER)) {
+
+            Expression exp = parsePrimaryExpression();
+            FunctionCallStatement funkStatement = new FunctionCallStatement((FunctionCallExpression) exp);
+
+            return funkStatement;
+        } else {
+            return null;
+        }
+    }
+
+    private Statement parseReturnStatement(){
+        if (tokens.match(RETURN)) {
+
+            ReturnStatement retStatement = new ReturnStatement();
+            retStatement.setStart(tokens.consumeToken());
+            retStatement.setFunctionDefinition(currentFunctionDefinition);
+
+            if (!tokens.match(EOF) && !tokens.match(RIGHT_BRACE)) {
+                retStatement.setExpression(parseExpression());
+            }
+
+            return retStatement;
         } else {
             return null;
         }
@@ -245,9 +566,13 @@ public class CatScriptParser {
         else {
             SyntaxErrorExpression syntaxErrorExpression = new SyntaxErrorExpression(tokens.consumeToken());
             return syntaxErrorExpression;
+//            throw new UnknownExpressionParseException();
         }
     }
 
+//    idk you had this in one of your videos
+//    private class UnknownExpressionParseException extends RuntimeException {
+//    }
 
 
     //============================================================

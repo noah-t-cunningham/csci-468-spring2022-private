@@ -70,8 +70,23 @@ public class ComparisonExpression extends Expression {
     //==============================================================
 
     @Override
+    //long but striaght forward, we did something like this in an early CS class, anna say 127,
+    // we made a little calculator and it was just, and still is, starnge to me that you
+    // use the programs in mathmatical operators to make 'your own' operators.
+    // Anyway, I just check what the operator is and do the appropriate comparison related to said operator
     public Object evaluate(CatscriptRuntime runtime) {
-        return super.evaluate(runtime);
+        Integer lhsValue = (Integer) leftHandSide.evaluate(runtime);
+        Integer rhsValue = (Integer) rightHandSide.evaluate(runtime);
+        if (operator.getType().equals(GREATER)) {
+            return lhsValue > rhsValue;
+        } else if (operator.getType().equals(GREATER_EQUAL)) {
+            return lhsValue >= rhsValue;
+        } else if (operator.getType().equals(LESS)) {
+            return lhsValue < rhsValue;
+        } else{ //(operator.getType().equals(LESS_EQUAL)) {
+            return lhsValue <= rhsValue;
+        }
+        //return super.evaluate(runtime);
     }
 
     @Override

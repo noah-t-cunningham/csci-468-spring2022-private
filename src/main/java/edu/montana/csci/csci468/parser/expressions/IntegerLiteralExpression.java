@@ -35,7 +35,9 @@ public class IntegerLiteralExpression extends Expression {
 
     @Override
     public Object evaluate(CatscriptRuntime runtime) {
+        // return the integer value
         return integerVal;
+
     }
 
     @Override

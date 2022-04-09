@@ -35,7 +35,9 @@ public class AssignmentStatement extends Statement {
         if (symbolType == null) {
             addError(ErrorType.UNKNOWN_NAME);
         } else {
-            // TOOD - verify compatilibity of types
+            if (!symbolTable.getSymbolType(variableName).isAssignableFrom(expression.getType())) {
+                addError(ErrorType.INCOMPATIBLE_TYPES);
+            }
         }
     }
 
@@ -44,7 +46,9 @@ public class AssignmentStatement extends Statement {
     //==============================================================
     @Override
     public void execute(CatscriptRuntime runtime) {
-        super.execute(runtime);
+        //I set the variableName and expression.evaluate(runtime)
+        runtime.setValue(variableName, expression.evaluate(runtime));
+        //super.execute(runtime);
     }
 
     @Override
