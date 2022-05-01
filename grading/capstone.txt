@@ -1,0 +1,4 @@
+Errors:
+
+- Missing source zip
+- Missing noah_cunningham_portfolio.pdf
