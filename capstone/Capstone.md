@@ -43,6 +43,27 @@ language and supports standard expressiosn and statements that will all be outli
 
 ## Features:
 
+### Comments:
+    
+#### Single Line:
+
+    var x = 2
+    // var x = 1 this line is a comment
+    print(x)
+ 
+output: 2 
+
+#### Multiline:
+
+    var x = 5
+    /* var x = 1 this line is a comment
+    var x = 2 this line is a comment
+    var x = 3 this line is a comment
+    var x = 4 this line is a comment */
+    print(x)
+    
+output: 5
+
 ### Expressiosns:
 
 #### Multiplicication:
