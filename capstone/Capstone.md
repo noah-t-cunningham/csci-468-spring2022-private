@@ -26,7 +26,7 @@ The pattern I used was Memoization/Flywheel. The code is located in src/main/jav
         return new ListType(type);
     }
     
-We did this becasue if we just returned a new list type there could potentially be a garbage collection error, additionally memoizing this will help
+I did this becasue if we just returned a new list type there could potentially be a garbage collection error, additionally memoizing this will help
 runtime in exchange for space. 
 
 # Section 4: Technical writing. Include the technical document that accompanied your capstone project.
