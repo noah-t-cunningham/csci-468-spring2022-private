@@ -117,7 +117,7 @@ output: true
 output: true
 
     print(x > 2)
-output: false\
+output: false
 
     print(x < 2)
 output: false
