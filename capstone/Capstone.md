@@ -104,54 +104,25 @@ output: 3
 #### Comparison:
 
     var x = 2
-
-##### Equals:
-
-    print(x == 1)
     print(x == 2)
-    print(x == 3)
+output: true
 
-output: false true false
-
-##### Not Equals:
-
-    print(x != 1)
     print(x != 2)
-    print(x != 3)
+output: false
 
-output: true false true
-
-##### Greater than or Equal:
-
-    print(x >= 1)
     print(x >= 2)
-    print(x >= 3)
+output: true
 
-output: true true false
-
-##### Less than or Equal:
-
-    print(x <= 1)
     print(x <= 2)
-    print(x <= 3)
+output: true
 
-ouput: false true true
-
-##### Greater than:
-
-    print(x > 1)
     print(x > 2)
-    print(x > 3)
+output: false\
 
-output: true false false
-
-##### Less than:
-
-    print(x < 1)
     print(x < 2)
-    print(x < 3)
+output: false
 
-output: false false true
+
 
 #### Unary: 
 
