@@ -10,9 +10,11 @@ Our Group was comprised of two Team Members. Team Member 1 refers to me and Team
 
 Team Member 1 was responsible for writing all the code to pass the tokenzier, parser, evaluation and bytecode tests.
 
-Team Member 2 was responsible for...
+Team Member 2 was responsible for writing 3 additional tests for the Compiler to pass and The Technical Documentation.
 
-My partner was a testing partner and provided 3 tests for my compiler. They also provided the documentaion for the CatScript Language. The compilers we made were colpletley done on our own. The compiler took about 120-150 hours to make while the tests and documentation took maybe an hour or two to come up with. 
+We Communicated through Discord and met in Person to coordinate and discuss the requirments.
+
+Team Member 1 contributed 120-150 hours to make the compiler while Team Member contributed 2-4 hours to complete the tests and documentation. 
 
 # Section 3: Design pattern
 
