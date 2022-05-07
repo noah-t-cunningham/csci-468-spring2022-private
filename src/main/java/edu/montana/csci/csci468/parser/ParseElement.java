@@ -65,6 +65,12 @@ public abstract class ParseElement {
     }
 
     public boolean hasErrors() {
+        // modified has errors to check if children have errors
+        for(ParseElement child: children){
+            if(child.hasErrors()){
+                return !child.errors.isEmpty();
+            }
+        }
         return !errors.isEmpty();
     }
 

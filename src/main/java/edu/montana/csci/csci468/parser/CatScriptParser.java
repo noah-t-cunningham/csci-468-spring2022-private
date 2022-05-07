@@ -257,40 +257,42 @@ public class CatScriptParser {
         }
     }
 
-    private Statement parseIfStatement() {
-        if (tokens.match(IF)) {
+    private Statement parseIfStatement(){
 
+        // had to reorganize to evaluate else if statments properly
+
+        if (tokens.match(IF)) {
             IfStatement ifStatement = new IfStatement();
             ifStatement.setStart(tokens.consumeToken());
 
             require(LEFT_PAREN, ifStatement);
-            ifStatement.setExpression(parseExpression());
+            Expression exp = parseExpression();
             require(RIGHT_PAREN, ifStatement);
             require(LEFT_BRACE, ifStatement);
-            LinkedList<Statement> stmts = new LinkedList<>();
-            while (!tokens.match(RIGHT_BRACE) && !tokens.match(EOF)) {
-                stmts.add(parseStatement());
+            LinkedList<Statement> trueStmts = new LinkedList<Statement>();
+            LinkedList<Statement> elseStmts = new LinkedList<Statement>();
+            while(!tokens.match(RIGHT_BRACE) && !tokens.match(EOF)) {
+                trueStmts.add(parseProgramStatement());
             }
-            ifStatement.setTrueStatements(stmts);
-            // since i use .nextToken() have to make sure im not at EOF or it goes out of range
+            //require(RIGHT_BRACE, ifStatement);
             if(!tokens.match(EOF)) {
                 Token next = tokens.nextToken();
                 if (next.getType() == ELSE) {
                     tokens.matchAndConsume(RIGHT_BRACE);
                     tokens.matchAndConsume(ELSE);
-                    if (tokens.matchAndConsume(IF))
-                        parseIfStatement();
-                    else {
+                    // else if
+                    if (tokens.match(IF)) {
+                        elseStmts.add(parseIfStatement());
+                    } else {
                         require(LEFT_BRACE, ifStatement);
                         if (!tokens.match(EOF)) {
-                            LinkedList<Statement> newStmts = new LinkedList<>();
                             while (!tokens.match(RIGHT_BRACE) && !tokens.match(EOF)) {
-                                // make new stmts becasuean if else stament could have soemthoing like
+                                // make new stmts becasuean if else stament could have somethoing like
                                 // if(something): x = 10
                                 // else: x = 5
-                                newStmts.add(parseStatement());
+                                elseStmts.add(parseStatement());
                             }
-                            ifStatement.setElseStatements(newStmts);
+                            ifStatement.setElseStatements(elseStmts);
                         }
                         ifStatement.setEnd(require(RIGHT_BRACE, ifStatement));
                     }
@@ -303,11 +305,63 @@ public class CatScriptParser {
                 ifStatement.setEnd(require(RIGHT_BRACE, ifStatement));
             }
 
+            ifStatement.setExpression(exp);
+            ifStatement.setTrueStatements(trueStmts);
+            ifStatement.setElseStatements(elseStmts);
             return ifStatement;
+
+            // this is the way i handled if statemnts before
+
+//            IfStatement ifStatement = new IfStatement();
+//            ifStatement.setStart(tokens.consumeToken());
+//
+//            require(LEFT_PAREN, ifStatement);
+//            ifStatement.setExpression(parseExpression());
+//            require(RIGHT_PAREN, ifStatement);
+//            require(LEFT_BRACE, ifStatement);
+//            LinkedList<Statement> trueStmts = new LinkedList<>();
+//            LinkedList<Statement> elseStmts = new LinkedList<>();
+//            while (!tokens.match(RIGHT_BRACE) && !tokens.match(EOF)) {
+//                trueStmts.add(parseStatement());
+//            }
+//            ifStatement.setTrueStatements(trueStmts);
+//            // since i use .nextToken() have to make sure im not at EOF or it goes out of range
+//            if(!tokens.match(EOF)) {
+//                Token next = tokens.nextToken();
+//                if (next.getType() == ELSE) {
+//                    tokens.matchAndConsume(RIGHT_BRACE);
+//                    tokens.matchAndConsume(ELSE);
+//                    // else if
+//                    if (tokens.match(IF))
+//                        elseStmts.add(parseIfStatement());
+//                    else {
+//                        require(LEFT_BRACE, ifStatement);
+//                        if (!tokens.match(EOF)) {
+//                            while (!tokens.match(RIGHT_BRACE) && !tokens.match(EOF)) {
+//                                // make new stmts becasuean if else stament could have somethoing like
+//                                // if(something): x = 10
+//                                // else: x = 5
+//                                elseStmts.add(parseStatement());
+//                            }
+//                            ifStatement.setElseStatements(elseStmts);
+//                        }
+//                        ifStatement.setEnd(require(RIGHT_BRACE, ifStatement));
+//                    }
+//                }
+//                else {
+//                    ifStatement.setEnd(require(RIGHT_BRACE, ifStatement));
+//                }
+//            }
+//            else {
+//                ifStatement.setEnd(require(RIGHT_BRACE, ifStatement));
+//            }
+//
+//            return ifStatement;
         } else {
             return null;
         }
     }
+
 
     private Statement parseVariableStatement() {
         if (tokens.match(VAR)) {

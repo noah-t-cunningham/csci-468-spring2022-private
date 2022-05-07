@@ -23,17 +23,14 @@ public class NullLiteralExpression extends Expression {
     public Object evaluate(CatscriptRuntime runtime) {
         // yup..
         return null;
-        //return super.evaluate(runtime);
     }
 
     @Override
-    public void transpile(StringBuilder javascript) {
-        super.transpile(javascript);
-    }
+    public void transpile(StringBuilder javascript) {super.transpile(javascript);}
 
     @Override
     public void compile(ByteCodeGenerator code) {
-        super.compile(code);
+        code.pushConstantOntoStack(null);
     }
 
 

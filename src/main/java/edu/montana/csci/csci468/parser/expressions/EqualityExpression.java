@@ -6,7 +6,12 @@ import edu.montana.csci.csci468.parser.CatscriptType;
 import edu.montana.csci.csci468.parser.SymbolTable;
 import edu.montana.csci.csci468.tokenizer.Token;
 import edu.montana.csci.csci468.tokenizer.TokenType;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.Opcodes;
 
+import java.util.Objects;
+
+import static edu.montana.csci.csci468.bytecode.ByteCodeGenerator.internalNameFor;
 import static edu.montana.csci.csci468.tokenizer.TokenType.EQUAL_EQUAL;
 import static edu.montana.csci.csci468.tokenizer.TokenType.GREATER;
 
@@ -64,7 +69,6 @@ public class EqualityExpression extends Expression {
         } else {
             return lhsValue != rhsValue;
         }
-        //return super.evaluate(runtime);
     }
 
     @Override
@@ -74,7 +78,24 @@ public class EqualityExpression extends Expression {
 
     @Override
     public void compile(ByteCodeGenerator code) {
-        super.compile(code);
+        getLeftHandSide().compile(code);
+        box(code, getLeftHandSide().getType());
+        getRightHandSide().compile(code);
+        box(code, getRightHandSide().getType());
+        code.addMethodInstruction(Opcodes.INVOKESTATIC, internalNameFor(Objects.class), "equals", "(Ljava/lang/Object;Ljava/lang/Object;)Z");
+
+        Label trueL = new Label();
+        Label  falseL = new Label();
+
+        // jumps
+        if(!isEqual()) {
+            code.addJumpInstruction(Opcodes.IFEQ, trueL);
+            code.pushConstantOntoStack(false);
+            code.addJumpInstruction(Opcodes.GOTO, falseL);
+            code.addLabel(trueL);
+            code.pushConstantOntoStack(true);
+            code.addLabel(falseL);
+        }
     }
 
 

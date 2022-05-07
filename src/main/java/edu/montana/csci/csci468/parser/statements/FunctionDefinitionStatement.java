@@ -8,6 +8,7 @@ import edu.montana.csci.csci468.parser.ErrorType;
 import edu.montana.csci.csci468.parser.ParseError;
 import edu.montana.csci.csci468.parser.SymbolTable;
 import edu.montana.csci.csci468.parser.expressions.TypeLiteral;
+import org.objectweb.asm.Opcodes;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -156,6 +157,25 @@ public class FunctionDefinitionStatement extends Statement {
 
     @Override
     public void compile(ByteCodeGenerator code) {
-        super.compile(code);
+        code.pushMethod(Opcodes.ACC_PUBLIC, name, getDescriptor());
+        for(String argName: argumentNames){
+            code.createLocalStorageSlotFor(argName);
+        }
+        //compile body
+        for(Statement st8mt: body){
+            st8mt.compile(code);
+        }
+
+        // add return instrcutions
+        if(type.equals(CatscriptType.VOID)){
+            code.addInstruction(Opcodes.RETURN);
+        }else{
+            if (getType().equals(CatscriptType.INT) || getType().equals(CatscriptType.BOOLEAN)) {
+                code.addInstruction(Opcodes.IRETURN);
+            } else {
+                code.addInstruction(Opcodes.ARETURN);
+            }
+        }
+        code.popMethod();
     }
 }

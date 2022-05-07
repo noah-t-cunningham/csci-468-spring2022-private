@@ -7,7 +7,10 @@ import edu.montana.csci.csci468.parser.ErrorType;
 import edu.montana.csci.csci468.parser.ParseError;
 import edu.montana.csci.csci468.parser.SymbolTable;
 import edu.montana.csci.csci468.parser.expressions.Expression;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.Opcodes;
 
+import java.awt.*;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -71,19 +74,17 @@ public class IfStatement extends Statement {
     @Override
     public void execute(CatscriptRuntime runtime) {
         // kinda a fun one
-        // create object, if its true execute the true statments, if its false execute the else statments
+        // create object, if its true execute the true statements, if its false execute the else statements
         Object evaluate = expression.evaluate(runtime);
-        if(Boolean.TRUE.equals(evaluate)){
+        if (Boolean.TRUE.equals(evaluate)) {
             for (Statement statement : trueStatements) {
                 statement.execute(runtime);
             }
-        }
-        else if(Boolean.FALSE.equals(evaluate)){
+        } else if (Boolean.FALSE.equals(evaluate)) {
             for (Statement statement : elseStatements) {
                 statement.execute(runtime);
             }
         }
-        //super.execute(runtime);
     }
 
     @Override
@@ -93,6 +94,27 @@ public class IfStatement extends Statement {
 
     @Override
     public void compile(ByteCodeGenerator code) {
-        super.compile(code);
+        expression.compile(code);
+        Label trueL = new Label();
+        Label falseL = new Label();
+
+        if (elseStatements.size() > 0) {
+            code.addJumpInstruction(Opcodes.IFEQ, falseL);
+        } else {
+            code.addJumpInstruction(Opcodes.IFEQ, trueL);
+        }
+
+        for (Statement st8mt : trueStatements) {
+            st8mt.compile(code);
+        }
+
+        code.addJumpInstruction(Opcodes.GOTO, trueL);
+        if (elseStatements.size() > 0) {
+            code.addLabel(falseL);
+            for (Statement st8 : elseStatements) {
+                st8.compile(code);
+            }
+        }
+        code.addLabel(trueL);
     }
 }

@@ -7,6 +7,8 @@ import edu.montana.csci.csci468.parser.ErrorType;
 import edu.montana.csci.csci468.parser.ParseError;
 import edu.montana.csci.csci468.parser.SymbolTable;
 import edu.montana.csci.csci468.tokenizer.Token;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.Opcodes;
 
 import static edu.montana.csci.csci468.tokenizer.TokenType.*;
 
@@ -70,9 +72,9 @@ public class ComparisonExpression extends Expression {
     //==============================================================
 
     @Override
-    //long but striaght forward, we did something like this in an early CS class, anna say 127,
-    // we made a little calculator and it was just, and still is, starnge to me that you
-    // use the programs in mathmatical operators to make 'your own' operators.
+    //long but straight forward, we did something like this in an early CS class, anna say 127,
+    // we made a little calculator and it was just, and still is, strange to me that you
+    // use the programs in mathematical operators to make 'your own' operators.
     // Anyway, I just check what the operator is and do the appropriate comparison related to said operator
     public Object evaluate(CatscriptRuntime runtime) {
         Integer lhsValue = (Integer) leftHandSide.evaluate(runtime);
@@ -83,10 +85,10 @@ public class ComparisonExpression extends Expression {
             return lhsValue >= rhsValue;
         } else if (operator.getType().equals(LESS)) {
             return lhsValue < rhsValue;
-        } else{ //(operator.getType().equals(LESS_EQUAL)) {
+        } else{
             return lhsValue <= rhsValue;
         }
-        //return super.evaluate(runtime);
+
     }
 
     @Override
@@ -96,7 +98,26 @@ public class ComparisonExpression extends Expression {
 
     @Override
     public void compile(ByteCodeGenerator code) {
-        super.compile(code);
+        getLeftHandSide().compile(code);
+        getRightHandSide().compile(code);
+
+        Label setToFalse = new Label();
+        Label end = new Label();
+
+        // jumps
+        if(isLessThan()){ code.addJumpInstruction(Opcodes.IF_ICMPGE, setToFalse);}
+        else if(isGreater()){code.addJumpInstruction(Opcodes.IF_ICMPLE, setToFalse); }
+        else if(isGreaterThanOrEqual()){code.addJumpInstruction(Opcodes.IF_ICMPLT, setToFalse); }
+        else if(isLessThanOrEqual()){code.addJumpInstruction(Opcodes.IF_ICMPGT, setToFalse); }
+
+
+        code.pushConstantOntoStack(true);
+        code.addJumpInstruction(Opcodes.GOTO, end);
+        code.addLabel(setToFalse);
+        code.pushConstantOntoStack(false);
+        code.addLabel(end);
+
+
     }
 
 }

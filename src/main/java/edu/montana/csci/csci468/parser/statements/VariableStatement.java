@@ -7,6 +7,9 @@ import edu.montana.csci.csci468.parser.ErrorType;
 import edu.montana.csci.csci468.parser.ParseError;
 import edu.montana.csci.csci468.parser.SymbolTable;
 import edu.montana.csci.csci468.parser.expressions.Expression;
+import org.objectweb.asm.Opcodes;
+
+import static edu.montana.csci.csci468.bytecode.ByteCodeGenerator.internalNameFor;
 
 public class VariableStatement extends Statement {
     private Expression expression;
@@ -85,6 +88,60 @@ public class VariableStatement extends Statement {
 
     @Override
     public void compile(ByteCodeGenerator code) {
-        super.compile(code);
+
+
+        /* original code for some reason it wasnt working when i did it like this, so i changed it a bit to
+         seems like putting "L" + internalNameFor(getType().getJavaType()) + ";" in the descriptor slot was a
+         no no, but i dont really know whats going on, just did stuff till it worked, lol */
+
+//        if(isGlobal()){
+//            //store in field
+//            if(getType().equals(CatscriptType.INT) || getType().equals(CatscriptType.BOOLEAN)){
+//                code.addField(variableName, "I");
+//                code.addVarInstruction(Opcodes.ALOAD, 0);
+//                expression.compile(code);
+//                code.addFieldInstruction(Opcodes.PUTFIELD,  variableName, "I", code.getProgramInternalName());
+//            }else {
+//                code.addField(variableName, internalNameFor(getType().getJavaType()) + ";");
+//                code.addVarInstruction(Opcodes.ALOAD, 0);
+//                expression.compile(code);
+//                code.addFieldInstruction(Opcodes.PUTFIELD,  variableName, "L" + internalNameFor(getType().getJavaType()) + ";", code.getProgramInternalName());
+//            }
+//        }else{
+//            //store in slot
+//            Integer locSlot = code.createLocalStorageSlotFor(variableName);
+//            if(getType().equals(CatscriptType.INT) || getType().equals(CatscriptType.BOOLEAN)){
+//                expression.compile(code);
+//                code.addVarInstruction(Opcodes.ISTORE, locSlot);
+//            }else{
+//                expression.compile(code);
+//                code.addVarInstruction(Opcodes.ASTORE, locSlot);
+//            }
+//
+//        }
+
+        if (isGlobal()) {
+            //store in field
+            String des;
+            if (getType().equals(CatscriptType.INT) || getType().equals(CatscriptType.BOOLEAN)) {
+                des = "I";
+            } else {
+                des = "L" + internalNameFor(getType().getJavaType()) + ";";
+            }
+            code.addField(variableName, des);
+            code.addVarInstruction(Opcodes.ALOAD, 0);
+            expression.compile(code);
+            code.addFieldInstruction(Opcodes.PUTFIELD, variableName, des, code.getProgramInternalName());
+        } else {
+            //store in slot
+            Integer locSlot = code.createLocalStorageSlotFor(variableName);
+            if (getType().equals(CatscriptType.INT) || getType().equals(CatscriptType.BOOLEAN)) {
+                expression.compile(code);
+                code.addVarInstruction(Opcodes.ISTORE, locSlot);
+            } else {
+                expression.compile(code);
+                code.addVarInstruction(Opcodes.ASTORE, locSlot);
+            }
+        }
     }
 }

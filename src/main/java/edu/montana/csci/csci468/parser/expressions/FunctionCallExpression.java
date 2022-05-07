@@ -7,10 +7,13 @@ import edu.montana.csci.csci468.parser.ErrorType;
 import edu.montana.csci.csci468.parser.ParseError;
 import edu.montana.csci.csci468.parser.SymbolTable;
 import edu.montana.csci.csci468.parser.statements.FunctionDefinitionStatement;
+import org.objectweb.asm.Opcodes;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
+import static edu.montana.csci.csci468.bytecode.ByteCodeGenerator.internalNameFor;
 
 public class FunctionCallExpression extends Expression {
     private final String name;
@@ -77,7 +80,6 @@ public class FunctionCallExpression extends Expression {
             argList.add(argument.evaluate(runtime));
         }
         return function.invoke(runtime, argList);
-        //return super.evaluate(runtime);
     }
 
     @Override
@@ -87,8 +89,23 @@ public class FunctionCallExpression extends Expression {
 
     @Override
     public void compile(ByteCodeGenerator code) {
-        super.compile(code);
+        code.addVarInstruction(Opcodes.ALOAD, 0);
+        FunctionDefinitionStatement func = getProgram().getFunction(name);
+        for(int i = 0 ; i < arguments.size(); i++){
+            Expression exp = arguments.get(i);
+            exp.compile(code);
+            // What if the param type for arg i is obeject and the arg is int
+            CatscriptType paramType = func.getParameterType(i);
+            CatscriptType argType = exp.getType();
+            if(paramType.equals(CatscriptType.OBJECT)){
+                if(argType.equals(CatscriptType.INT) || argType.equals(CatscriptType.BOOLEAN)) {
+                    box(code, argType);
+                }
+            }
+        }
+        code.addMethodInstruction(Opcodes.INVOKEVIRTUAL, code.getProgramInternalName(), name, func.getDescriptor());
     }
+
 
 
 }
